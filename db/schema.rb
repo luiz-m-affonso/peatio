@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_27_101029) do
+ActiveRecord::Schema.define(version: 2021_08_03_124131) do
 
   create_table "accounts", primary_key: ["currency_id", "member_id"], options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.bigint "member_id", null: false
@@ -118,6 +118,7 @@ ActiveRecord::Schema.define(version: 2021_07_27_101029) do
     t.text "description"
     t.string "homepage"
     t.string "type", limit: 30, default: "coin", null: false
+    t.bigint "default_network_id"
     t.string "status", limit: 32, default: "enabled", null: false
     t.integer "position", null: false
     t.integer "precision", limit: 1, default: 8, null: false
@@ -250,7 +251,7 @@ ActiveRecord::Schema.define(version: 2021_07_27_101029) do
 
   create_table "members", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "uid", limit: 32, null: false
-    t.string "email", null: false
+    t.string "email"
     t.integer "level", null: false
     t.string "role", limit: 16, null: false
     t.string "group", limit: 32, default: "vip-0", null: false
