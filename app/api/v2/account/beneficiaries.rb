@@ -174,9 +174,9 @@ module API
 
             if beneficiary.activate!(params[:pin])
               present beneficiary, with: API::V2::Entities::Beneficiary
-            else
-              error!({ errors: ['account.beneficiary.invalid_pin'] }, 422)
             end
+
+            return error!({ errors: ['account.beneficiary.invalid_pin'] }, 422)
           end
 
           desc 'Delete beneficiary'
@@ -196,9 +196,9 @@ module API
 
             if beneficiary.archive!
               body false
-            else
-              error!({ errors: ['account.beneficiary.cant_delete'] }, 422)
             end
+
+            return error!({ errors: ['account.beneficiary.cant_delete'] }, 422)
           end
         end
       end
