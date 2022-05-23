@@ -109,10 +109,10 @@ module API
             if adjustment.save
               present adjustment, with: API::V2::Admin::Entities::Adjustment
               status 201
-            else
-              body errors: adjustment.errors.full_messages
-              status 422
             end
+
+            body errors: adjustment.errors.full_messages
+            return status 422
           end
 
           desc 'Accepts adjustment and creates operations or reject adjustment.',
@@ -133,22 +133,27 @@ module API
             if adjustment.amount.negative?
               account_number_hash = ::Operations.split_account_number(account_number: adjustment.receiving_account_number)
               member = Member.find_by(uid: account_number_hash[:member_uid])
-              if member.present?
-                balance = member.get_account(account_number_hash[:currency_id]).balance
-
-                if adjustment.amount.abs() > balance && params[:action] != 'reject'
-                  error!({ errors: ['admin.adjustment.user_insufficient_balance'] }, 422)
-                end
-              end
+              verify_member_presence_and_adjustment(member, account_number_hash, adjustment)
             end
 
             if adjustment.public_send("may_#{params[:action]}?")
               # TODO: Add behaviour in case of errors on action.
               adjustment.public_send("#{params[:action]}!", validator: current_user)
               present adjustment, with: API::V2::Admin::Entities::Adjustment
-            else
-              body errors: ["admin.adjustment.cannot_perform_#{params[:action]}_action"]
-              status 422
+            end
+            body errors: ["admin.adjustment.cannot_perform_#{params[:action]}_action"]
+            return status 422
+          end
+        end
+
+        private
+
+        def verify_member_presence_and_adjustment(member)
+          if member.present?
+            balance = member.get_account(account_number_hash[:currency_id]).balance
+
+            if adjustment.amount.abs() > balance && params[:action] != 'reject'
+              error!({ errors: ['admin.adjustment.user_insufficient_balance'] }, 422)
             end
           end
         end
